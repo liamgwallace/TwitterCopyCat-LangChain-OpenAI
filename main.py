@@ -29,7 +29,7 @@ openai_api_key = os.getenv('OPENAI_API_KEY')
 
 # Initialize the LLM
 llm_exact = ChatOpenAI(temperature=0, openai_api_key=openai_api_key, model_name='gpt-3.5-turbo')
-llm_creative = ChatOpenAI(temperature=0.9, openai_api_key=openai_api_key, model_name='gpt-3.5-turbo')
+llm_creative = ChatOpenAI(temperature=1, openai_api_key=openai_api_key, model_name='gpt-3.5-turbo')
 
 # Set your Twitter API credentials
 TWITTER_BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
@@ -174,7 +174,7 @@ def generate_tweet_in_style(authors_tone_description, tweet_examples, subject):
      - Your goal is to write content with the tone that is described below.
      - These output must be in the style of the examples you are given, but be completely unique 
      - Do not go outside the tone instructions below
-% HOW TO DESCRIBE TONE
+    % HOW TO DESCRIBE TONE
     {how_to_describe_tone}
 
     % START OF EXAMPLES
@@ -200,7 +200,7 @@ def generate_tweet_in_style(authors_tone_description, tweet_examples, subject):
 
     return new_tweet
 
-def generate_tweet_subject(tweet_examples):
+def generate_tweet_subject(tweet_examples, old_subjects):
     """
     Function to generate a subject for a new tweet based on given examples.
 
@@ -214,13 +214,16 @@ def generate_tweet_subject(tweet_examples):
     % INSTRUCTIONS
      - You are an AI Bot that is very good at coming up with great ideas based on some input examples
      - These ideas must be in the style the examples you are given, but be completely unique 
-     - do not include any words from the examples in your response
+     - The examples are a guide to show the typical subjects
+     - Do not include any words from the examples in your response
      - Your goal is to write a subject for a new tweet based on the examples given
     % START OF EXAMPLES
     {tweet_examples}
     % END OF EXAMPLES
 
-    Write the unique new subject of a tweet in under 5 words.
+    Write the unique new subject of a tweet in under 4 words.
+    It must be COMPLETELY different from these previous subjects: {old_subjects}
+    Get creative think about all the subjects used and imagine what else they might talk about
     """
 
     # Create a HumanMessagePromptTemplate from the template
@@ -230,8 +233,7 @@ def generate_tweet_subject(tweet_examples):
     chat_prompt = ChatPromptTemplate.from_messages([human_message_prompt])
 
     # Format the ChatPromptTemplate with the query
-    formatted_prompt = chat_prompt.format_prompt(tweet_examples=tweet_examples).to_messages()
-
+    formatted_prompt = chat_prompt.format_prompt(tweet_examples=tweet_examples, old_subjects=old_subjects).to_messages()
     # Generate a new subject for the tweets using the LLM
     new_subject = llm_creative(formatted_prompt).content
 
@@ -280,14 +282,18 @@ def main():
         # Get the description of the author's tone based on user's tweets
         authors_tone_description = get_authors_tone_description(how_to_describe_tone, users_tweets)
         print(f"\nNew tweets in the style of @{user_screen_name}")
+        # clear the subject list
+        subjects = []  # Initialize an empty list
 
         for i in range(3):
             # Generate the subject for the new tweet
-            subject = generate_tweet_subject(users_tweets)
-
+            subject = generate_tweet_subject(users_tweets, subjects)
+            
             # Generate the new tweet in the style of the examples
             new_tweet = generate_tweet_in_style(authors_tone_description, users_tweets, subject)
             
+            #keep a list of used subjects
+            subjects.append(subject)
             print(f"\nSubject: {subject}")
             print(f"{new_tweet}")
 

@@ -9,6 +9,9 @@ This is a Python program that generates tweets in the style of a given Twitter u
 - Generate new tweets in the same style as the examples
 - Generate subjects for new tweets based on the examples
 
+## Code Source
+- Code copied from [here](https://github.com/gkamradt/langchain-tutorials/blob/main/data_generation/Instructing%20LLMs%20To%20Match%20Tone.ipynb)
+
 ## Requirements
 
 - Python 3.x

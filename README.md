@@ -28,7 +28,7 @@ pip install -r requirements.txt
 - Twitter API Credentials: Create a Twitter Developer account and obtain the necessary credentials
 
 4. Update the following variables in the `.env` file
-- rename '.env_template' file to '.env'
+- rename 'template.env' file to just '.env'
 - `openai_api_key` - Set this variable to your OpenAI API key.
 - `TWITTER_BEARER_TOKEN` - Set this variable to your Twitter Bearer Token.
 
